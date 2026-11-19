@@ -13,30 +13,17 @@ class RuleEvidence:
     fragment_refs: tuple[tuple[FragmentRef, ...], ...]
 
 
-def _rules_in_sheet_catalog(
-    restrictions: Iterable[Restriction], chains: Iterable[FragmentChain]
-) -> tuple[Restriction, ...]:
-    sheets = {}
-    for chain in chains:
-        tiles = {part.tile_id for part in chain.fragments}
-        if len(tiles) == 1:
-            sheets[chain.road_id] = next(iter(tiles))
-    return tuple(
-        rule for rule in restrictions
-        if all(road in sheets for road in rule.roads)
-        and len({sheets[road] for road in rule.roads}) == 1
-    )
-
-
 def build_rule_evidence(
     restrictions: Iterable[Restriction], chains: Iterable[FragmentChain]
 ) -> tuple[RuleEvidence, ...]:
+    # Every named rule must survive a re-tiling: a restriction is judged on the
+    # three consecutively completed original directed roads, regardless of which
+    # sheets their ordered fragment groups happen to live on.
     chains = tuple(chains)
     by_road = {chain.road_id: chain.refs for chain in chains}
-    local = _rules_in_sheet_catalog(restrictions, chains)
     return tuple(
         RuleEvidence(rule.id, rule.roads, tuple(by_road[road] for road in rule.roads))
-        for rule in sorted(local, key=lambda rule: rule.id)
+        for rule in sorted(tuple(restrictions), key=lambda rule: rule.id)
     )
 
 
@@ -50,7 +37,7 @@ def validate_rule_evidence(
     rules = tuple(evidence)
     actual = validate_restrictions((Restriction(rule.id, rule.roads) for rule in rules), roads)
     if expected_rules is not None:
-        expected = _rules_in_sheet_catalog(validate_restrictions(expected_rules, roads), chains)
+        expected = validate_restrictions(expected_rules, roads)
         if actual != expected:
             raise ValueError('rule evidence does not cover the selected revision')
     by_road = {chain.road_id: chain.refs for chain in chains}
