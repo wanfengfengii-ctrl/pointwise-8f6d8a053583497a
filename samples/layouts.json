@@ -1,0 +1,25 @@
+{
+  "single": {
+    "tiles": ["sheet"],
+    "seams": [],
+    "fragments": [
+      ["a", "a", "sheet", 0, "X", "J", 1],
+      ["h", "h", "sheet", 0, "X", "Y", 1],
+      ["d", "d", "sheet", 0, "Y", "J", 1],
+      ["b", "b", "sheet", 0, "J", "K", 2],
+      ["c", "c", "sheet", 0, "K", "T", 1]
+    ]
+  },
+  "split": {
+    "tiles": ["west", "east"],
+    "seams": [["b", "join", 4, 2]],
+    "fragments": [
+      ["a", "a", "west", 0, "X", "J", 1],
+      ["h", "h", "west", 0, "X", "Y", 1],
+      ["d", "d", "west", 0, "Y", "J", 1],
+      ["b1", "b", "west", 0, "J", ["b", "join"], 1],
+      ["b2", "b", "east", 1, ["b", "join"], "K", 1],
+      ["c", "c", "east", 0, "K", "T", 1]
+    ]
+  }
+}
